@@ -57,7 +57,7 @@ def split_nodes_links(old_nodes):
             new_nodes.append(node)
         else:
             node_text = node.text
-            search =  re.search(r"\[([^\[\]]*)\]\(([^\(\)]*)\)", node_text)
+            search =  re.search(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", node_text)
             while search is not None:
                 span = search.span()
                 first_part = node_text[:span[0]]
@@ -69,11 +69,19 @@ def split_nodes_links(old_nodes):
                 link = extract_markdown_links(link_part)
                 new_node = TextNode(link[0][0],TextType.LINK,link[0][1])
                 new_nodes.append(new_node)
-                search =  re.search(r"\[([^\[\]]*)\]\(([^\(\)]*)\)", node_text)
+                search =  re.search(r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)", node_text)
             if node_text is not None and node_text != "":
                 new_node = TextNode(node_text, TextType.TEXT)
                 new_nodes.append(new_node)
     return new_nodes
+
+def split_nodes(old_nodes):
+    image_nodes = split_nodes_links(old_nodes)
+    link_nodes = split_nodes_images(image_nodes)
+    bold_nodes = split_nodes_delimiter(link_nodes, "**", TextType.BOLD)
+    italic_nodes = split_nodes_delimiter(bold_nodes, "_", TextType.ITALIC)
+    code_nodes = split_nodes_delimiter(italic_nodes, "`", TextType.CODE)
+    return code_nodes
 
 
 
