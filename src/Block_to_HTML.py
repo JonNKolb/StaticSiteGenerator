@@ -37,12 +37,7 @@ def block_to_children(block, block_type):
         children_nodes.append(LeafNode("code", text[0].text))
         return children_nodes
     if block_type == BlockType.ORD_LIST or block_type == BlockType.UNORD_LIST:
-        textnodes = split_nodes(text)
-        list_parent_node = ParentNode("li", children=[])
-        for node in textnodes:
-            list_parent_node.children.append(text_node_to_html_node(node))
-        children_nodes.append(list_parent_node)
-        return children_nodes
+        return text
     textnodes = split_nodes(text)
     for text_node in textnodes:
         children_nodes.append(text_node_to_html_node(text_node))
@@ -61,18 +56,19 @@ def block_to_text(block, block_type):
     if block_type == BlockType.CODE:
         return [TextNode(block.strip("```"),TextType.TEXT)]
     if block_type == BlockType.UNORD_LIST:
-        blocks = block.split("\n")
-        list_items = []
-        for list_item in blocks:
-            list_items.append(TextNode(list_item[2:],TextType.TEXT))
-        return list_items
+        items = block.split("\n")
+        html_items = []
+        for item in items:
+            text = item[2:]
+            children = block_to_children(text, BlockType.PARA)
+            html_items.append(ParentNode("li", children))
+        return html_items
     if block_type == BlockType.ORD_LIST:
-        blocks = block.split("\n")
-        list_items = []
-        i = 1
-        for list_item in blocks:
-            rng = len(str(i))+2
-            list_items.append(TextNode(list_item[rng:], TextType.TEXT))
-            i += 1
-        return list_items
+        items = block.split("\n")
+        html_items = []
+        for item in items:
+            text = item[3:]
+            children = block_to_children(text, BlockType.PARA)
+            html_items.append(ParentNode("li", children))
+        return html_items
     return [TextNode(block, TextType.TEXT)]

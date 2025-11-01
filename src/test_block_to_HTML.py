@@ -107,32 +107,32 @@ class Testblock_to_text(unittest.TestCase):
     def test_ordlist_to_text0(self):
         block = """1. This is an ordered list.\n2. It can span multiple lines."""
         text = block_to_text(block, BlockType.ORD_LIST)
-        result = [TextNode("This is an ordered list.", TextType.TEXT), TextNode("It can span multiple lines.", TextType.TEXT)]
-        self.assertTrue(text[0] == result[0])
+        result = [LeafNode(None,"This is an ordered list."), LeafNode(None, "It can span multiple lines.")]
+        self.assertEqual(text[0].children[0].to_html(), result[0].to_html())
 
     def test_ordlist_to_text1(self):
         block = """1. This is an ordered list."""
         text = block_to_text(block, BlockType.ORD_LIST)
         result = TextNode("This is an ordered list.", TextType.TEXT)
-        self.assertTrue(text[0] == result)
+        self.assertTrue(text[0].children[0].to_html() == result.text)
 
     def test_unordlist_to_text0(self):
         block = """- This is an unordered list.\n- It can span multiple lines."""
         text = block_to_text(block, BlockType.UNORD_LIST)
         result = TextNode("This is an unordered list.", TextType.TEXT)
-        self.assertTrue(text[0] == result)
+        self.assertTrue(text[0].children[0].to_html() == result.text)
 
     def test_unordlist_to_text1(self):
         block = """- This is an unordered list."""
         text = block_to_text(block, BlockType.UNORD_LIST)
         result = TextNode("This is an unordered list.", TextType.TEXT)
-        self.assertTrue(text[0] == result)
+        self.assertTrue(text[0].children[0].to_html() == result.text)
 
     def test_para_to_text1(self):
         block = """This is just a line of text\nthat needs to be converted"""
         text = block_to_text(block, BlockType.PARA)
         result = TextNode("This is just a line of text\nthat needs to be converted", TextType.TEXT)
-        self.assertTrue(text[0] == result)
+        self.assertTrue(text[0].text == result.text)
 
 class Testblock_to_children(unittest.TestCase):
     def test_Heading(self):
