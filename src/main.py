@@ -7,8 +7,7 @@ from extract_markdown import extract_title
 def main():
     delete_contents("./public")
     copy_contents("./static","./public")
-    generate_page("./content/index.md","./template.html","./public/index.html")
-    return
+    generate_page("./content","./template.html","./public")
 
 def delete_contents(pth):
     contents = os.listdir(pth)
@@ -29,21 +28,36 @@ def copy_contents(source, target):
             target_dir = os.path.join(target, content)
             os.mkdir(target_dir)
             copy_contents(content_path, target_dir)
+    return
+
+def identify_pages(source):
+    md_files = []
+    contents = os.listdir(source)
+    for content in contents:
+        content_path = os.path.join(source, content)
+        if os.path.isfile(content_path) == True and os.path.splitext(content_path)[1] == ".md":
+            md_files.append(content_path)
+        elif os.path.isdir(content_path):
+            md_files.extend(identify_pages(content_path))
+    return md_files
 
 def generate_page(from_path, template_path, dest_path):
-    print(f'Generating page from {from_path} to {dest_path} using {template_path}')
-    with open(from_path, 'r') as from_file: 
-        markdown = from_file.read()
-    with open(template_path, 'r') as template_file:
-        template = template_file.read()
-    html = markdown_to_html_node(markdown)
-    header = extract_title(markdown)
-    template = template.replace("{{ Title }}", header)
-    template = template.replace("{{ Content }}", html.to_html())
-    directory = os.path.dirname(dest_path)
-    os.makedirs(directory, exist_ok=True)
-    with open(dest_path, mode='x') as file:
-        file.write(template)
+    md_files = identify_pages(from_path)
+    for file_path in md_files:
+        file_dest = file_path.replace(from_path, dest_path).replace(".md",".html")
+        print(f'Generating page from {file_path} to {file_dest} using {template_path}')
+        with open(file_path, 'r') as from_file: 
+            markdown = from_file.read()
+        with open(template_path, 'r') as template_file:
+            template = template_file.read()
+        html = markdown_to_html_node(markdown)
+        header = extract_title(markdown)
+        template = template.replace("{{ Title }}", header)
+        template = template.replace("{{ Content }}", html.to_html())
+        directory = os.path.dirname(file_dest)
+        os.makedirs(directory, exist_ok=True)
+        with open(file_dest, mode='x') as file:
+            file.write(template)
 
 
 main()
